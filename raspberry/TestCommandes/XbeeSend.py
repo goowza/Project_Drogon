@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import time
 import serial
 import argparse
@@ -32,20 +32,20 @@ except:
 def choixMsg():
     if mynumber.get()=="Tourner droite":
         msg=1
-        label1.configure(text="Commande envoyée : " + mynumber.get())
+        label1.configure(text="Commande envoyee : " + mynumber.get())
     elif mynumber.get()=="Tourner gauche":
         msg=0
-        label1.configure(text="Commande envoyée : " + mynumber.get())
+        label1.configure(text="Commande envoyee : " + mynumber.get())
     elif mynumber.get()=="Actionner roues":
         msg=2
-        label1.configure(text="Commande envoyée : " + mynumber.get())
+        label1.configure(text="Commande envoyee : " + mynumber.get())
     else:
         msg=77
         label1.configure(text="Veuillez saisir une commande valable")
-    ser.write(str.encode(msg))
+    ser.write(str.encode(str(msg)))
 
 
-label = ttk.Label(window, text = "Commande à envoyer")
+label = ttk.Label(window, text = "Commande a envoyer")
 label.grid(column = 0, row = 0)
 
 mynumber = tk.StringVar()
@@ -56,7 +56,7 @@ combobox.grid(column = 0, row = 1)
 button = ttk.Button(window, text = "Envoyer", command = choixMsg)
 button.grid(column = 0, row = 2)
 
-label1 = ttk.Label(window, text = "Commande envoyée : En attente")
+label1 = ttk.Label(window, text = "Commande envoyee : En attente")
 label1.grid(column = 0, row = 3)
 
 

@@ -14,7 +14,7 @@ MOVE_LEFT = "0"
 MOVE_RIGHT = "1"
 
 ser = serial.Serial(
-    port='/dev/ttyUSB0',
+    port='/dev/ttyUSB1',
     baudrate=9600,
     parity=serial.PARITY_NONE,
     stopbits=serial.STOPBITS_ONE,
@@ -51,9 +51,11 @@ while 1:
     elif msg_xbee == MOVE_RIGHT:
         steer_cmd = 100 | 0x80
         print("turning right")
+    elif msg_xbee == "":
+        pass
     else:
         print("Unknown message : {}".format(msg_xbee))
 
     # Send msg on the CAN bus
     msg = can.Message(arbitration_id=MCM, data=[0, 0, steer_cmd, 0, 0, 0, 0, 0], extended_id=False)
-    #bus.send(msg)
+    bus.send(msg)

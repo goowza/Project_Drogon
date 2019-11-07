@@ -13,6 +13,7 @@ ser = serial.Serial(
 counter=0       
       
 while 1:
-    ser.write(str.encode('Write counter: %d \n'%(counter)))
+    steer_command = input("Send command (0 = left | 1 = right)")
+    ser.write(str.encode(steer_command))
     time.sleep(1)
     counter += 1

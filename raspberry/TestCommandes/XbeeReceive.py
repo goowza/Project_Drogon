@@ -4,6 +4,7 @@ import can
 import serial
 import os
 import time
+import argparse
 
 HOST = ''                 # Symbolic name meaning all available interfaces
 PORT = 6666              # Arbitrary non-privileged port
@@ -13,15 +14,23 @@ MCM = 0x010
 MOVE_LEFT = "0"
 MOVE_RIGHT = "1"
 
-ser = serial.Serial(
-    port='/dev/ttyUSB1',
-    baudrate=9600,
-    parity=serial.PARITY_NONE,
-    stopbits=serial.STOPBITS_ONE,
-    bytesize=serial.EIGHTBITS,
-    timeout=1             
- )
-counter=0
+# Manage arguments used when launching the script
+parser = argparse.ArgumentParser()
+parser.add_argument("serial_port", help="serial port of XBee module")
+args = parser.parse_args()
+
+# Creates serial link with XBee module
+try:
+    ser = serial.Serial(
+        port=args.serial_port,
+        baudrate=9600,
+        parity=serial.PARITY_NONE,
+        stopbits=serial.STOPBITS_ONE,
+        bytesize=serial.EIGHTBITS,
+        timeout=1
+    )
+except:
+    print("Error creating the serial link")
 
 # Steering angle = 0
 steer_cmd = 50 | 0x80

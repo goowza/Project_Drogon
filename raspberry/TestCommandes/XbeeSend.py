@@ -2,11 +2,19 @@
 import time
 import serial
 import argparse
+import tkinter as tk
+from tkinter import ttk
 
 # Manage arguments used when launching the script
 parser = argparse.ArgumentParser()
 parser.add_argument("serial_port", help="serial port of XBee module")
 args = parser.parse_args()
+
+#
+window = tk.Tk()
+window.minsize(400, 200)
+window.title("Python Tkinter Combo box")
+msg=77
 
 # Creates serial link with XBee module
 try:
@@ -21,8 +29,36 @@ try:
 except:
     print("Error creating the serial link")
 
-while 1:
-    # Send user input over XBee
-    steer_command = input("Send command (0 = left | 1 = right)")
-    ser.write(str.encode(steer_command))
-    time.sleep(1)
+def choixMsg():
+    if mynumber.get()=="Tourner droite":
+        msg=1
+        label1.configure(text="Commande envoyée : " + mynumber.get())
+    elif mynumber.get()=="Tourner gauche":
+        msg=0
+        label1.configure(text="Commande envoyée : " + mynumber.get())
+    elif mynumber.get()=="Actionner roues":
+        msg=2
+        label1.configure(text="Commande envoyée : " + mynumber.get())
+    else:
+        msg=77
+        label1.configure(text="Veuillez saisir une commande valable")
+    ser.write(str.encode(msg))
+
+
+label = ttk.Label(window, text = "Commande à envoyer")
+label.grid(column = 0, row = 0)
+
+mynumber = tk.StringVar()
+combobox = ttk.Combobox(window, width = 15 , textvariable = mynumber)
+combobox['values'] = ("Tourner droite","Tourner gauche","Actionner roues")
+combobox.grid(column = 0, row = 1)
+
+button = ttk.Button(window, text = "Envoyer", command = choixMsg)
+button.grid(column = 0, row = 2)
+
+label1 = ttk.Label(window, text = "Commande envoyée : En attente")
+label1.grid(column = 0, row = 3)
+
+
+
+window.mainloop()

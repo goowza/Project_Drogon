@@ -13,6 +13,7 @@ MCM = 0x010
 
 MOVE_LEFT = "0"
 MOVE_RIGHT = "1"
+MOVE_FORWARD = "2"
 
 # Manage arguments used when launching the script
 parser = argparse.ArgumentParser()
@@ -34,6 +35,8 @@ except:
 
 # Steering angle = 0
 steer_cmd = 50 | 0x80
+# Stop rear wheels
+move_cmd = 0 & ~0x80
 
 while 1:
     # Setup CAN communication bus
@@ -53,18 +56,26 @@ while 1:
     # Convert it to a string
     msg_xbee = msg_xbee.decode("utf-8")
 
-    # Compute steering command based on the xbee msg
+    # Turn front wheels to the left and stop rear wheels
     if msg_xbee == MOVE_LEFT:
         steer_cmd = 0 | 0x80
-        print("turning left")
+        move_cmd = 0 & ~0x80
+        print("TURNING LEFT")
+    # Turn front wheels to the right and stop rear wheels
     elif msg_xbee == MOVE_RIGHT:
         steer_cmd = 100 | 0x80
-        print("turning right")
+        move_cmd = 0 & ~0x80
+        print("TURNING RIGHT")
+    # Set front wheels at 0° and move rear wheels forward
+    elif msg_xbee == MOVE_FORWARD:
+        move_cmd = 50 | 0x80
+        steer_cmd = 50 | 0x80
+        print("GOING FORWARD")
     elif msg_xbee == "":
         pass
     else:
         print("Unknown message : {}".format(msg_xbee))
 
     # Send msg on the CAN bus
-    msg = can.Message(arbitration_id=MCM, data=[0, 0, steer_cmd, 0, 0, 0, 0, 0], extended_id=False)
+    msg = can.Message(arbitration_id=MCM, data=[move_cmd, move_cmd, steer_cmd, 0, 0, 0, 0, 0], extended_id=False)
     bus.send(msg)

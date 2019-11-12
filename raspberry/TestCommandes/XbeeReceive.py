@@ -59,7 +59,7 @@ while 1:
     # Turn front wheels to the left and stop rear wheels
     if msg_xbee == MOVE_LEFT:
         steer_cmd = 0 | 0x80
-        move_cmd = 0 & ~0x80
+        move_cmd = 50 & ~0x80
         print("TURNING LEFT")
     # Turn front wheels to the right and stop rear wheels
     elif msg_xbee == MOVE_RIGHT:
@@ -68,7 +68,7 @@ while 1:
         print("TURNING RIGHT")
     # Set front wheels at 0° and move rear wheels forward
     elif msg_xbee == MOVE_FORWARD:
-        move_cmd = 50 | 0x80
+        move_cmd = 75 | 0x80
         steer_cmd = 50 | 0x80
         print("GOING FORWARD")
     elif msg_xbee == "":

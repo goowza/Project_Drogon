@@ -5,6 +5,8 @@ from tkinter import *
 import os
 import time
 import can
+import serial
+import argparse
 
 HOST = ''                 # Symbolic name meaning all available interfaces
 PORT = 6666              # Arbitrary non-privileged port

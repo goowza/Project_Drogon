@@ -16,6 +16,9 @@ US2 = 0x001
 OM1 = 0x101
 OM2 = 0x102
 
+count = 0
+move_cmd = 0 | ~0x80
+
 while 1:
     # Setup CAN communication bus
     print('Bring up CAN0....')
@@ -59,8 +62,15 @@ while 1:
             # header : SWR payload : entier, *0.01rpm
             speed_right= int.from_bytes(msg.data[6:8], byteorder='big')
             
-            print("Speed Left : {} | Speed Right : {}".format(speed_left,speed_right))
+            print("Speed Left : {} | Speed Right : {}\r".format(speed_left,speed_right))
         elif msg.arbitration_id == OM1:
             pass
         elif msg.arbitration_id == OM2:
             pass
+	
+        move_cmd = count % 50 + 50
+        move_cmd |= 0x80
+        print("Command : {0:b}".format(move_cmd))
+        msg = can.Message(arbitration_id=MCM, data=[move_cmd,move_cmd,0,0,0,0,0], extended_id=False)
+        bus.send(msg)
+        time.sleep(0.5)

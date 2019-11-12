@@ -13,7 +13,7 @@ args = parser.parse_args()
 #
 window = tk.Tk()
 window.minsize(400, 200)
-window.title("Python Tkinter Combo box")
+window.title("Drogon interface")
 msg=77
 
 # Creates serial link with XBee module
@@ -30,33 +30,33 @@ except:
     print("Error creating the serial link")
 
 def choixMsg():
-    if mynumber.get()=="Tourner droite":
+    if mynumber.get()=="Turn right":
         msg=1
-        label1.configure(text="Commande envoyee : " + mynumber.get())
-    elif mynumber.get()=="Tourner gauche":
+        label1.configure(text="Command sent : " + mynumber.get())
+    elif mynumber.get()=="Turn left":
         msg=0
-        label1.configure(text="Commande envoyee : " + mynumber.get())
-    elif mynumber.get()=="Actionner roues":
+        label1.configure(text="Command sent : " + mynumber.get())
+    elif mynumber.get()=="Activate wheels":
         msg=2
-        label1.configure(text="Commande envoyee : " + mynumber.get())
+        label1.configure(text="Command sent : " + mynumber.get())
     else:
         msg=77
-        label1.configure(text="Veuillez saisir une commande valable")
+        label1.configure(text="Choose a valid command")
     ser.write(str.encode(str(msg)))
 
 
-label = ttk.Label(window, text = "Commande a envoyer")
+label = ttk.Label(window, text = "Choose a command")
 label.grid(column = 0, row = 0)
 
 mynumber = tk.StringVar()
 combobox = ttk.Combobox(window, width = 15 , textvariable = mynumber)
-combobox['values'] = ("Tourner droite","Tourner gauche","Actionner roues")
+combobox['values'] = ("Turn right","Turn left","Activate wheels")
 combobox.grid(column = 0, row = 1)
 
-button = ttk.Button(window, text = "Envoyer", command = choixMsg)
+button = ttk.Button(window, text = "Send", command = choixMsg)
 button.grid(column = 0, row = 2)
 
-label1 = ttk.Label(window, text = "Commande envoyee : En attente")
+label1 = ttk.Label(window, text = "Command sent : ")
 label1.grid(column = 0, row = 3)
 
 

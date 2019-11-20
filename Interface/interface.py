@@ -3,8 +3,8 @@ from tkinter import ttk
 
 
 window = tk.Tk()
-window.minsize(400, 200)
-window.title("Python Tkinter Combo box")
+window.minsize(400, 400)
+window.title("Drogon Projet : Commandes V2V")
 msg=77
 
 def choixMsg():
@@ -35,6 +35,10 @@ button.grid(column = 0, row = 2)
 
 label1 = ttk.Label(window, text = "Commande envoyée : En attente")
 label1.grid(column = 0, row = 3)
+
+image = tk.PhotoImage(file="logo.gif")
+label2 = tk.Label(image=image)
+label2.grid(column = 1)
 
 
 

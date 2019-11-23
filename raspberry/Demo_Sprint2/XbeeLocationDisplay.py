@@ -25,7 +25,9 @@ except:
 
 while 1:
 	# Read message received on the XBee
-	msg=ser.readline().strip().decode().split(":")
+	msg=ser.readline().strip().decode()
+	print(msg)
+	msg = msg.split(":")
 	# Convert it to a string
 	lat = 0
 	long = 0

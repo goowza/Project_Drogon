@@ -52,6 +52,11 @@ class GUI():
         self.command_choice_label = Label(self.infos_frame, text="Command sent : ")
         self.infos_frame.pack(fill=X, padx=(5, 5), pady=(5, 5))
         self.command_choice_label.pack(fill=X, padx=(5, 5), pady=(5, 5))
+        
+        self.coords_frame = LabelFrame(self.window, text="Coordinates", font=("Courier", 12, "bold"))
+        self.coords_label = Label(self.coords_frame, text=". . .", font=("Courier", 12, "bold"))
+        self.coords_frame.pack(fill=X, padx=(5, 5), pady=(5, 5))
+        self.coords_label.pack(fill=X, padx=(5, 5), pady=(5, 5))
 
 
     def sendMsg(self):
@@ -75,6 +80,16 @@ class GUI():
             self.ser.write(str.encode(msg))
             self.command_choice_label.configure(text="Command sent : " + self.command_choice.get())
 
+    def readCoords(self):
+        msg = self.ser.readline().decode().split(":")
+        lat = 0
+        long = 0
+        if len(msg) > 1:
+            if msg[1] == SHARE_LOCATION:
+                lat = msg[2]
+                long = msg[3]
+        self.coords_label.configure(text="Latitude : {} | Longitude : {}".format(lat, long))
+    
     def buildMessage(self, command):
         msg_to_write = str(ID) + ":" + str(command)
         return msg_to_write
@@ -86,4 +101,6 @@ if __name__=="__main__":
     args = parser.parse_args()
     
     myGUI = GUI(args.serial_port)
-    myGUI.window.mainloop()
+    while True:
+        myGUI.readCoords()
+        myGUI.window.update()

@@ -35,6 +35,7 @@ class Xbee():
 		return command
 	
 	def write(self, msg):
+		print("Location : {}".format(msg))
 		if msg != "":
 			self.ser.write(str.encode(msg))
 

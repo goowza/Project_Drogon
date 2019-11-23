@@ -54,7 +54,10 @@ class Car():
 		
 	
 	def computeCommand(self):
-		self.command = self.xbee.readCommand()
+		temp = self.xbee.readCommand()
+		if temp != -1:
+			self.command = temp
+
 		if self.command == MOVE_LEFT:
 			self.steer_cmd = 0 | 0x80
 			self.move_cmd = 50 & ~0x80

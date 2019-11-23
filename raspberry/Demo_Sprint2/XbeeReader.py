@@ -25,9 +25,19 @@ class Xbee():
 			exit()
 		
 	def readCommand(self):
+		command = -1
 		message_read = self.ser.readline().decode()
-		return message_read.split(SERIAL_DELIMITER)[1]
+		print(message_read)
+		message_read = message_read.split(SERIAL_DELIMITER)
+		if len(message_read) > 1:
+			command = message_read[1]
+		return command
 		
 	def write(self, msg):
 		if msg != "":
 			self.ser.write(str.encode(msg))
+
+if __name__=="__main__":
+	myXbee = Xbee("/dev/ttyUSB0")
+	while True:
+		myXbee.readCommand()

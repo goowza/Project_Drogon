@@ -101,6 +101,6 @@ if __name__=="__main__":
     args = parser.parse_args()
     
     myGUI = GUI(args.serial_port)
-    while True:
-        myGUI.readCoords()
-        myGUI.window.update()
+    myGUI.window.mainloop()
+    
+    

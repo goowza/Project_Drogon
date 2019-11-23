@@ -73,10 +73,13 @@ class Car():
 			print("STOP")
 		elif self.command == SHARE_LOCATION:
 			self.share_location = True
+			print("SHARING_LOCATION")
 		elif self.command == STOP_SHARING_LOCATION:
 			self.share_location = False
+			print("STOPPED SHARING LOCATION")
 		else:
-			print("Unknown command : {}".format(self.command))
+			pass
+			#print("Unknown command : {}".format(self.command))
 			
 	def buildMessage(self):
 		msg = str(self.id)+":"+str(self.command)
@@ -91,5 +94,6 @@ class Car():
 		if self.share_location:
 			self.gps.update()
 			msg_to_write = self.buildMessage()
+			print("Broadcasting {}".format(msg_to_write))
 			self.xbee.write(msg_to_write)
 		

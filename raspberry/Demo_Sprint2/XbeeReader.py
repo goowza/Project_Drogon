@@ -38,6 +38,6 @@ class Xbee():
 			self.ser.write(str.encode(msg))
 
 if __name__=="__main__":
-	myXbee = Xbee("/dev/ttyUSB0")
+	myXbee = Xbee("/dev/ttyUSB1")
 	while True:
 		myXbee.readCommand()

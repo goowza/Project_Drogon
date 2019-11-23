@@ -6,6 +6,7 @@ import serial
 XBEE_SERIAL_BAUDRATE = 9600
 SERIAL_DELIMITER = ":"
 
+
 class Xbee():
 	def __init__(self, serial_port):
 		self.serial_port = serial_port
@@ -23,7 +24,7 @@ class Xbee():
 		except OSError:
 			print("Error creating the serial link")
 			exit()
-		
+	
 	def readCommand(self):
 		command = -1
 		message_read = self.ser.readline().decode()
@@ -32,12 +33,13 @@ class Xbee():
 		if len(message_read) > 1:
 			command = message_read[1]
 		return command
-		
+	
 	def write(self, msg):
 		if msg != "":
 			self.ser.write(str.encode(msg))
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
 	myXbee = Xbee("/dev/ttyUSB1")
 	while True:
 		myXbee.readCommand()

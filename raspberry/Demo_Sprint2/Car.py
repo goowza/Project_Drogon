@@ -5,7 +5,7 @@ import can
 import os
 import time
 from GPSReader import *
-from XbeeReader import *
+from Xbee import *
 
 MOVE_LEFT = "0"
 MOVE_RIGHT = "1"

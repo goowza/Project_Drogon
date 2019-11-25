@@ -27,7 +27,7 @@ if __name__=="__main__":
 	connexion.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 	try:
 		print("Connecting to server...")
-		connexion.connect((host, port))
+		#connexion.connect((host, port))
 	except socket.error:
 		print("Connection with server failed")
 		sys.exit()

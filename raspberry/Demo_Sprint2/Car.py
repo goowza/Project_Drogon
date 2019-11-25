@@ -10,6 +10,8 @@ from Xbee import *
 from Encodage import *
 from threading import Thread
 from queue import Queue
+from threading import Lock
+import argparse
 
 MOVE_LEFT = "0"
 MOVE_RIGHT = "1"
@@ -119,3 +121,14 @@ class Car(Thread):
 					self.lock.release()
 					self.lock.acquire()
 					start = time()
+
+if __name__=="__main__":
+    # Manage arguments used when launching the script
+    parser = argparse.ArgumentParser()
+    parser.add_argument("serial_port_gps", help="serial port of GPS")
+    parser.add_argument("serial_port_xbee", help="serial port of xbee")
+    args = parser.parse_args()
+    lock = Lock()
+    queue = Queue()
+    myCar = Car(12,args.serial_port_gps, args.serial_port_xbee, lock, queue)
+    myCar.run()

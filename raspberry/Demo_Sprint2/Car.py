@@ -4,7 +4,6 @@
 import can
 import os
 import time
-from time import time
 from GPSReader import *
 from Xbee import *
 from Encodage import *
@@ -58,12 +57,14 @@ class Car(Thread):
 			exit()
 		
 	def sendCANCommand(self):
+		print("CAN : {} | {}".format(self.move_cmd, self.steer_cmd))
 		# Send msg on CAN to move rear wheels
-		msg = can.Message(arbitration_id=MCM, data=[self.move_cmd, self.move_cmd, 0, 0, 0, 0, 0, 0], extended_id=False)
-		self.bus.send(msg)
-		# Send msg on CAN to move front wheels
 		msg = can.Message(arbitration_id=MCM, data=[0, 0, self.steer_cmd, 0, 0, 0, 0, 0], extended_id=False)
 		self.bus.send(msg)
+		#time.sleep(0.1)
+		# Send msg on CAN to move front wheels
+		#msg = can.Message(arbitration_id=MCM, data=[0, 0, self.steer_cmd, 0, 0, 0, 0, 0], extended_id=False)
+		#self.bus.send(msg)
 		
 	
 	def computeCommand(self):
@@ -105,7 +106,7 @@ class Car(Thread):
 		return msg
 	
 	def run(self):
-		start = time() + SERVER_SEND_COOLDOWN
+		start = time.time() + SERVER_SEND_COOLDOWN
 		while 1:
 			self.computeCommand()
 			self.sendCANCommand()
@@ -120,7 +121,7 @@ class Car(Thread):
 				if time() - start > SERVER_SEND_COOLDOWN:
 					self.lock.release()
 					self.lock.acquire()
-					start = time()
+					start = time.time()
 
 if __name__=="__main__":
     # Manage arguments used when launching the script

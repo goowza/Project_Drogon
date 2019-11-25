@@ -24,7 +24,9 @@ if __name__=="__main__":
 	
 	# Connexion with server
 	connexion = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	connexion.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 	try:
+		print("Connecting to server...")
 		connexion.connect((host, port))
 	except socket.error:
 		print("Connection with server failed")
@@ -40,10 +42,12 @@ if __name__=="__main__":
 	th_E = ThreadEmission(connexion, lock, queue)
 	th_R = ThreadReception(connexion)
 	
-	thread_car.start()
-	th_E.start()
-	th_R.start()
+	#thread_car.start()
+	#th_E.start()
+	#th_R.start()
 	
-	thread_car.join()
-	th_E.join()
-	th_R.join()
+	#thread_car.join()
+	#th_E.join()
+	#th_R.join()
+
+	connexion.close()

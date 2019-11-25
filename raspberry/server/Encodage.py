@@ -6,7 +6,7 @@ def tableEmetteur(type):
     elif type=="borne":
         return 2
     else:
-        return 'Z'
+        return 'z'
 
 def tableEvenement(type):
     if type=="accident":
@@ -14,10 +14,8 @@ def tableEvenement(type):
     elif type=="embouteillage":
         return 1
     else:
-        return 'Z'
+        return 'z'
 
 def encodage(idEmetteur, idEvenement, data):
     message = str(tableEmetteur(idEmetteur))+str(tableEvenement(idEvenement))+str(data)
     return message
-
-print(encodage("pieton","accident","105.85.45"))

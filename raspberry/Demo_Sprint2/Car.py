@@ -6,6 +6,7 @@ import os
 import time
 from GPSReader import *
 from Xbee import *
+from Encodage import *
 
 MOVE_LEFT = "0"
 MOVE_RIGHT = "1"
@@ -104,6 +105,7 @@ class Car(threading.Thread):
 				msg_to_write = self.buildMessage()
 				print("Broadcasting {}".format(msg_to_write))
 				self.xbee.write(msg_to_write)
+				message_emis=encodage("pieton","accident","105.85:43.45")
 				self.lock.release()
 				self.lock.acquire()
 		

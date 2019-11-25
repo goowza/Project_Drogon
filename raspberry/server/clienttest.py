@@ -2,11 +2,11 @@
  # Definition d'un client reseau gerant en parallele l'emission
  # et la reception des messages (utilisation de 2 THREADS).
 
-#host = '10.1.5.190'
-#port = 40001
+host = '10.1.5.190'
+port = 40001
 
-host='127.0.0.1'
-port=9999
+#host='127.0.0.1'
+#port=9999
 import socket, sys, threading
 import time
 
@@ -19,17 +19,10 @@ class ThreadSync(threading.Thread):
 
     def run(self):
          global message_emis
-         a=0
          self.lock.acquire()
-         while 1:
-             if input()=="S":
-                 a=a+1
-                 message_emis=message_emis+str(a)
-                 print(message_emis)
-                 self.lock.release()
-                 print("Relache")
-                 self.lock.acquire()
-                 print("Ack")
+         message_emis=input()
+         self.lock.release()
+         self.lock.acquire()
 
 
 
@@ -80,7 +73,7 @@ print("Connexion etablie avec le serveur.")
             
 # Dialogue avec le serveur : on lance deux threads pour gerer
 # independamment l'emission et la reception des messages :
-message_emis ="A5B69" #Variable globale
+message_emis ="" #Variable globale
 lock = threading.Lock()
 th_S= ThreadSync()
 th_E = ThreadEmission(connexion)

@@ -2,11 +2,11 @@
  # Definition d'un client reseau gerant en parallele l'emission
  # et la reception des messages (utilisation de 2 THREADS).
 
-#host = '10.1.5.190'
-#port = 40001
+host = '10.1.5.190'
+port = 40001
 
-host='127.0.0.1'
-port=9999
+#host='127.0.0.1'
+#port=9999
 import socket, sys, threading
 import time
 
@@ -30,11 +30,6 @@ class ThreadSync(threading.Thread):
                  print("Relache")
                  self.lock.acquire()
                  print("Ack")
-
-
-
-
-
 
 class ThreadReception(threading.Thread):
    """objet thread gerant la reception des messages"""

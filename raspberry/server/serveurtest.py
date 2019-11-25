@@ -6,6 +6,10 @@ import time
 HOST = '10.1.5.190'
 PORT = 40001
 
+#pour tester en local
+#HOST = 'localhost'
+#PORT = 9999
+
 import socket, sys, threading
  
 class ThreadClient(threading.Thread):
@@ -23,7 +27,7 @@ class ThreadClient(threading.Thread):
                break
            message = "%s> %s" % (nom, msgClient)
            print message
-           date=time.strftime("%d/%m/%Y %H:%M:%S : ")
+           date=time.strftime("%d/%m/%Y %Hh%Mm%Ss : ")
            f.write(date + msgClient + "\n" )
            # Faire suivre le message a tous les autres clients :
            for cle in conn_client:

@@ -8,11 +8,11 @@ import socket, sys, threading
 import time
 from queue import Queue
 
-#host = '10.1.5.190'
-#port = 40001
+host = '10.1.5.190'
+port = 40001
 
-host='127.0.0.1'
-port=9999
+#host='127.0.0.1'
+#port=9999
 
 # Manage arguments used when launching the script
 parser = argparse.ArgumentParser()

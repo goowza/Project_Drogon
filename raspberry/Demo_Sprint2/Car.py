@@ -4,9 +4,12 @@
 import can
 import os
 import time
+from time import time
 from GPSReader import *
 from Xbee import *
 from Encodage import *
+from threading import Thread
+from queue import Queue
 
 MOVE_LEFT = "0"
 MOVE_RIGHT = "1"
@@ -17,20 +20,24 @@ STOP_SHARING_LOCATION = "5"
 SERIAL_DELIMITER = ":"
 
 MCM = 0x010
+SERVER_SEND_COOLDOWN = 500
 
 # Steering angle = 0
 NULL_STEER = 50 | 0x80
 # Stop rear wheels
 STOP_MOTORS = 0 & ~0x80
 
-class Car(threading.Thread):
-	def __init__(self, id, serial_port_gps, serial_port_xbee, lock):
-		threading.Thread.__init__(self)
+#global message_emis
+
+class Car(Thread):
+	def __init__(self, id, serial_port_gps, serial_port_xbee, lock, queue):
+		Thread.__init__(self)
 		self.lock = lock
 		self.lock.acquire()
 		self.id = id
 		self.gps = GPSReader(serial_port_gps)
 		self.xbee = Xbee(serial_port_xbee)
+		self.queue = queue
 		
 		self.command = -1
 		self.move_cmd = STOP_MOTORS
@@ -96,7 +103,7 @@ class Car(threading.Thread):
 		return msg
 	
 	def run(self):
-		global message_emis
+		start = time() + SERVER_SEND_COOLDOWN
 		while 1:
 			self.computeCommand()
 			self.sendCANCommand()
@@ -105,7 +112,10 @@ class Car(threading.Thread):
 				msg_to_write = self.buildMessage()
 				print("Broadcasting {}".format(msg_to_write))
 				self.xbee.write(msg_to_write)
-				message_emis=encodage("pieton","accident","105.85:43.45")
-				self.lock.release()
-				self.lock.acquire()
-		
+				message_emis=encodage("pieton", "accident", "105.85:43.45")
+				self.queue.put(message_emis)
+				
+				if time() - start > SERVER_SEND_COOLDOWN:
+					self.lock.release()
+					self.lock.acquire()
+					start = time()

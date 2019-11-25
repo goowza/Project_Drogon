@@ -6,6 +6,7 @@ from Car import *
 from clienttest import *
 import socket, sys, threading
 import time
+from queue import Queue
 
 #host = '10.1.5.190'
 #port = 40001
@@ -30,10 +31,18 @@ if __name__=="__main__":
 		sys.exit()
 	print("Connexion etablie avec le serveur.")
 
+	# Shared variables
+	queue = Queue()
 	lock = threading.Lock()
-	th_S = Car(42, args.serial_port_gps, args.serial_port_xbee,lock)
-	th_E = ThreadEmission(connexion, lock)
+	
+	thread_car = Car(42, args.serial_port_gps, args.serial_port_xbee, lock, queue)
+	th_E = ThreadEmission(connexion, lock, queue)
 	th_R = ThreadReception(connexion)
-	th_S.start()
+	
+	thread_car.start()
 	th_E.start()
 	th_R.start()
+	
+	thread_car.join()
+	th_E.join()
+	th_R.join()

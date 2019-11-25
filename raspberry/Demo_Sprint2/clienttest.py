@@ -10,26 +10,30 @@ port = 40001
 import socket, sys, threading
 import time
 
+#global message_emis
 
+"""
 class ThreadSync(threading.Thread):
 
-    def __init__(self):
+    def __init__(self, lock, queue):
         threading.Thread.__init__(self)
         self.lock = lock
+        self.queue = queue
 
     def run(self):
-         global message_emis
-         a=0
-         self.lock.acquire()
-         while 1:
-             if input()=="S":
-                 a=a+1
-                 message_emis=message_emis+str(a)
-                 print(message_emis)
-                 self.lock.release()
-                 print("Relache")
-                 self.lock.acquire()
-                 print("Ack")
+        global message_emis
+        a = 0
+        self.lock.acquire()
+        while 1:
+            if input() == "S":
+                a = a+1
+                message_emis=message_emis+str(a)
+                print(message_emis)
+                self.lock.release()
+                print("Relache")
+                self.lock.acquire()
+                print("Ack")
+"""
 
 class ThreadReception(threading.Thread):
    """objet thread gerant la reception des messages"""
@@ -51,35 +55,37 @@ class ThreadReception(threading.Thread):
    
 class ThreadEmission(threading.Thread):
     """objet thread gerant l'emission des messages"""
-    def __init__(self, conn, lock):
+    def __init__(self, conn, lock, queue):
         threading.Thread.__init__(self)
         self.lock = lock
         self.connexion = conn           # ref. du socket de connexion
+        self.queue = queue
         
     def run(self):
-        global message_emis
         while 1:
             self.lock.acquire()
+            message_emis = self.queue.get()
             self.connexion.send(message_emis.encode('utf-8'))
             self.lock.release()
             time.sleep(0.1)
 
-# Programme principal - etablissement de la connexion :
-connexion = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-try:
-    connexion.connect((host, port))
-except socket.error:
-    print("La connexion a echoue.")
-    sys.exit()    
-print("Connexion etablie avec le serveur.")
-            
-# Dialogue avec le serveur : on lance deux threads pour gerer
-# independamment l'emission et la reception des messages :
-message_emis ="A5B69" #Variable globale
-lock = threading.Lock()
-th_S= ThreadSync()
-th_E = ThreadEmission(connexion)
-th_R = ThreadReception(connexion)
-th_S.start()
-th_E.start()
-th_R.start()        
+if __name__=="__main__":
+    # Programme principal - etablissement de la connexion :
+    connexion = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        connexion.connect((host, port))
+    except socket.error:
+        print("La connexion a echoue.")
+        sys.exit()
+    print("Connexion etablie avec le serveur.")
+    
+    # Dialogue avec le serveur : on lance deux threads pour gerer
+    # independamment l'emission et la reception des messages :
+    message_emis ="A5B69" #Variable globale
+    lock = threading.Lock()
+    #th_S= ThreadSync()
+    th_E = ThreadEmission(connexion, lock)
+    th_R = ThreadReception(connexion)
+    #th_S.start()
+    th_E.start()
+    th_R.start()

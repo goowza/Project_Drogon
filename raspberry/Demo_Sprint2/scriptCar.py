@@ -14,7 +14,6 @@ from queue import Queue
 host='127.0.0.1'
 port=9999
 
-
 # Manage arguments used when launching the script
 parser = argparse.ArgumentParser()
 parser.add_argument("serial_port_gps", help="serial port of GPS")
@@ -22,19 +21,21 @@ parser.add_argument("serial_port_xbee", help="serial port of xbee")
 args = parser.parse_args()
 
 if __name__=="__main__":
-	message_emis=""
+	
+	# Connexion with server
 	connexion = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	try:
 		connexion.connect((host, port))
 	except socket.error:
-		print("La connexion a echoue.")
+		print("Connection with server failed")
 		sys.exit()
-	print("Connexion etablie avec le serveur.")
+	print("Connection with server established")
 
 	# Shared variables
 	queue = Queue()
 	lock = threading.Lock()
 	
+	# Threads declaration
 	thread_car = Car(42, args.serial_port_gps, args.serial_port_xbee, lock, queue)
 	th_E = ThreadEmission(connexion, lock, queue)
 	th_R = ThreadReception(connexion)

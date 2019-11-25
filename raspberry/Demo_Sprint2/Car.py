@@ -22,8 +22,11 @@ NULL_STEER = 50 | 0x80
 # Stop rear wheels
 STOP_MOTORS = 0 & ~0x80
 
-class Car():
-	def __init__(self, id, serial_port_gps, serial_port_xbee):
+class Car(threading.Thread):
+	def __init__(self, id, serial_port_gps, serial_port_xbee, lock):
+		threading.Thread.__init__(self)
+		self.lock = lock
+		self.lock.acquire()
 		self.id = id
 		self.gps = GPSReader(serial_port_gps)
 		self.xbee = Xbee(serial_port_xbee)
@@ -92,11 +95,15 @@ class Car():
 		return msg
 	
 	def run(self):
-		self.computeCommand()
-		self.sendCANCommand()
-		if self.share_location:
-			self.gps.update()
-			msg_to_write = self.buildMessage()
-			print("Broadcasting {}".format(msg_to_write))
-			self.xbee.write(msg_to_write)
+		global message_emis
+		while 1:
+			self.computeCommand()
+			self.sendCANCommand()
+			if self.share_location:
+				self.gps.update()
+				msg_to_write = self.buildMessage()
+				print("Broadcasting {}".format(msg_to_write))
+				self.xbee.write(msg_to_write)
+				self.lock.release()
+				self.lock.acquire()
 		

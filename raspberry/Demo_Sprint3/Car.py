@@ -7,10 +7,10 @@ import time
 from GPSReader import *
 from Xbee import *
 from Encodage import *
-from threading import Thread
+from threading import Thread, Lock
 from queue import Queue
-from threading import Lock
 import argparse
+from xbee import XBee
 
 MOVE_LEFT = "0"
 MOVE_RIGHT = "1"

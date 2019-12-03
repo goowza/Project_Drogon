@@ -2,6 +2,8 @@
 # coding: utf-8
 
 import serial
+from xbee import XBee
+import time
 
 XBEE_SERIAL_BAUDRATE = 9600
 SERIAL_DELIMITER = ":"
@@ -13,21 +15,15 @@ class Xbee():
 		
 		# Creates serial link with XBee module
 		try:
-			self.ser = serial.Serial(
-				port=self.serial_port,
-				baudrate=XBEE_SERIAL_BAUDRATE,
-				parity=serial.PARITY_NONE,
-				stopbits=serial.STOPBITS_ONE,
-				bytesize=serial.EIGHTBITS,
-				timeout=1
-			)
+                    serial_port = serial.Serial(serial_port, XBEE_SERIAL_BAUDRATE)
+                    xbee = XBee(serial_port, callback=lambda:readCommand(self))
 		except OSError:
 			print("Error creating the serial link")
 			exit()
 	
-	def readCommand(self):
+	def readCommand(self, data):
 		command = -1
-		message_read = self.ser.readline().decode()
+		message_read = data["rd_data"].decode()
 		print(message_read)
 		message_read = message_read.split(SERIAL_DELIMITER)
 		if len(message_read) > 1:
@@ -41,6 +37,10 @@ class Xbee():
 
 
 if __name__ == "__main__":
-	myXbee = Xbee("/dev/ttyUSB1")
-	while True:
-		myXbee.readCommand()
+    myXbee = Xbee("/dev/ttyUSB1")
+    while True:
+        try:
+            time.sleep(0.001)
+        except KeyboardInterrupt:
+            break
+		

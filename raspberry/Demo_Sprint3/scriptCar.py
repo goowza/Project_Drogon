@@ -9,7 +9,7 @@ import time
 from queue import Queue
 
 host = '10.105.1.85'
-port = 40003
+port = 40002
 
 #host='127.0.0.1'
 #port=9999

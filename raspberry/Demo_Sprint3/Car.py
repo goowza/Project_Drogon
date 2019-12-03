@@ -68,7 +68,7 @@ class Car(Thread):
 		
 	
 	def computeCommand(self):
-		temp = self.xbee.readCommand()
+		temp = self.xbee.command
 		if temp != -1:
 			self.command = temp
 

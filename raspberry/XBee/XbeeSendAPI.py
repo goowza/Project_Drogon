@@ -8,6 +8,8 @@ import argparse
 from xbee import XBee
 
 BROADCAST_ADDR_16 = b'\xFF\xFF'
+CAR_ID = "HL118"
+COMMAND_ID = "0" 
 
 class XbeeSenderAPI():
     def __init__(self, serial_port):
@@ -19,10 +21,11 @@ class XbeeSenderAPI():
             exit()
             
     def sendMessageBroadcast(self, data):
-        data = data.encode("utf-8")
-        print("Broadcasting {}...".format(data), end='\r')
+        msg = ""
+        msg = CAR_ID + ":" + COMMAND_ID + ":" + data
+        print("Broadcasting {}".format(msg), end='\r')
         # Definition des arguments de send() dans Xbee.ieee.Xbee (ctrl + click)
-        self.xbee.send(cmd='tx',dest_addr=BROADCAST_ADDR_16,data=data)
+        self.xbee.send(cmd='tx',dest_addr=BROADCAST_ADDR_16,data=msg)
         
 # Manage arguments used when launching the script
 parser = argparse.ArgumentParser()

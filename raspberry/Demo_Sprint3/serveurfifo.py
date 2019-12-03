@@ -1,14 +1,15 @@
 import time
+import os
 
  # Definition d'un serveur reseau gerant un systeme de CHAT simplifie.
  # Utilise les threads pour gerer les connexions clientes en parallele.
 
-HOST = '192.168.43.54'
-PORT = 40002
+HOST = '10.105.1.85'
+PORT = 40003
 
 #pour tester en local
 #HOST = 'localhost'
-#PORT = 9999
+#PORT = 9998
 
 import socket, sys, threading
  
@@ -28,7 +29,9 @@ class ThreadClient(threading.Thread):
            message = "%s> %s" % (nom, msgClient)
            print message
            date=time.strftime("%d/%m/%Y %Hh%Mm%Ss : ")
-           f.write(date + msgClient + "\n" )
+           msg=date + msgClient
+           cmd = 'echo ' + str(msg) + '>fifo1'
+           os.popen(cmd, 'w')
            # Faire suivre le message a tous les autres clients :
            for cle in conn_client:
                if cle != nom:      # ne pas le renvoyer a l'emetteur
@@ -48,7 +51,7 @@ except socket.error:
     print "La liaison du socket a l'adresse choisie a echoue."
     sys.exit()
 print "Serveur pret, en attente de requetes ..."
-f = open('file.txt', 'a') #Ouverture du fichier de stockage des trames recus
+#f = open('file.txt', 'a') #Ouverture du fichier de stockage des trames recus
 mySocket.listen(5)
 
 # Attente et prise en charge des connexions demandees par les clients :

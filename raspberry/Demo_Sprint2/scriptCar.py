@@ -8,8 +8,8 @@ import socket, sys, threading
 import time
 from queue import Queue
 
-host = '10.1.5.190'
-port = 40001
+host = '10.105.1.85'
+port = 40003
 
 #host='127.0.0.1'
 #port=9999
@@ -24,10 +24,10 @@ if __name__=="__main__":
 	
 	# Connexion with server
 	connexion = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	connexion.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+	#connexion.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 	try:
 		print("Connecting to server...")
-		connexion.connect(("192.168.1.1", port))
+		connexion.connect((host, port))
 	except socket.error:
 		print("Connection with server failed")
 		sys.exit()
@@ -42,12 +42,12 @@ if __name__=="__main__":
 	th_E = ThreadEmission(connexion, lock, queue)
 	th_R = ThreadReception(connexion)
 	
-	#thread_car.start()
-	#th_E.start()
-	#th_R.start()
+	thread_car.start()
+	th_E.start()
+	th_R.start()
 	
-	#thread_car.join()
-	#th_E.join()
-	#th_R.join()
+	thread_car.join()
+	th_E.join()
+	th_R.join()
 
 	connexion.close()

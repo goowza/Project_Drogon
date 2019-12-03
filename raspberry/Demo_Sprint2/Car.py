@@ -57,9 +57,9 @@ class Car(Thread):
 			exit()
 		
 	def sendCANCommand(self):
-		print("CAN : {} | {}".format(self.move_cmd, self.steer_cmd))
+		#print("CAN : {} | {}".format(self.move_cmd, self.steer_cmd))
 		# Send msg on CAN to move rear wheels
-		msg = can.Message(arbitration_id=MCM, data=[0, 0, self.steer_cmd, 0, 0, 0, 0, 0], extended_id=False)
+		msg = can.Message(arbitration_id=MCM, data=[self.move_cmd, self.move_cmd, self.steer_cmd, 0, 0, 0, 0, 0], extended_id=False)
 		self.bus.send(msg)
 		#time.sleep(0.1)
 		# Send msg on CAN to move front wheels

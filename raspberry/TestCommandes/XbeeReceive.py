@@ -38,24 +38,26 @@ steer_cmd = 50 | 0x80
 # Stop rear wheels
 move_cmd = 0 & ~0x80
 
+
+# Setup CAN communication bus
+print('Bring up CAN0....')
+os.system("sudo /sbin/ip link set can0 up type can bitrate 400000")
+time.sleep(0.1)
+
+try:
+    bus = can.interface.Bus(channel='can0', bustype='socketcan_native')
+except OSError:
+    print('Cannot find PiCAN board.')
+    exit()
 while 1:
-    # Setup CAN communication bus
-    print('Bring up CAN0....')
-    os.system("sudo /sbin/ip link set can0 up type can bitrate 400000")
-    time.sleep(0.1)
-
-    try:
-        bus = can.interface.Bus(channel='can0', bustype='socketcan_native')
-    except OSError:
-        print('Cannot find PiCAN board.')
-        exit()
-
     # Read message received on the XBee
     msg_xbee=ser.readline().strip()
 
     # Convert it to a string
     msg_xbee = msg_xbee.decode("utf-8")
 
+    if msg_xbee != "":
+        print(msg_xbee)
     # Turn front wheels to the left and stop rear wheels
     if msg_xbee == MOVE_LEFT:
         steer_cmd = 0 | 0x80

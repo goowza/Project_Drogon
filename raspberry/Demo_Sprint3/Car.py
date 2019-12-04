@@ -10,35 +10,17 @@ from Encodage import *
 from threading import Thread, Lock
 from queue import Queue
 import argparse
-from xbee import XBee
-
-MOVE_LEFT = "0"
-MOVE_RIGHT = "1"
-MOVE_FORWARD = "2"
-STOP = "3"
-SHARE_LOCATION = "4"
-STOP_SHARING_LOCATION = "5"
-SERIAL_DELIMITER = ":"
-
-MCM = 0x010
-SERVER_SEND_COOLDOWN = 500
-
-# Steering angle = 0
-NULL_STEER = 50 | 0x80
-# Stop rear wheels
-STOP_MOTORS = 0 & ~0x80
+from constants import *
 
 #global message_emis
 
 class Car(Thread):
-	def __init__(self, id, serial_port_gps, serial_port_xbee, lock, queue):
+	def __init__(self, id, serial_port_gps, serial_port_xbee, conn):
 		Thread.__init__(self)
-		self.lock = lock
-		self.lock.acquire()
 		self.id = id
 		self.gps = GPSReader(serial_port_gps)
 		self.xbee = Xbee(serial_port_xbee)
-		self.queue = queue
+		self.conn = conn
 		
 		self.command = -1
 		self.move_cmd = STOP_MOTORS
@@ -113,23 +95,21 @@ class Car(Thread):
 			if self.share_location:
 				self.gps.update()
 				msg_to_write = self.buildMessage()
-				print("Broadcasting {}".format(msg_to_write))
-				self.xbee.write(msg_to_write)
+				#print("Broadcasting {}".format(msg_to_write))
+				#self.xbee.write(msg_to_write)
 				message_emis=encodage("pieton", "accident", "105.85:43.45")
-				self.queue.put(message_emis)
+				#self.queue.put(message_emis)
 				
-				if time() - start > SERVER_SEND_COOLDOWN:
-					self.lock.release()
-					self.lock.acquire()
+				if time.time() - start > SERVER_SEND_COOLDOWN:
+					print("Sending {} to server".format(message_emis))
+					self.conn.send(message_emis.encode('utf-8'))
 					start = time.time()
 
-if __name__=="__main__":
-    # Manage arguments used when launching the script
-    parser = argparse.ArgumentParser()
-    parser.add_argument("serial_port_gps", help="serial port of GPS")
-    parser.add_argument("serial_port_xbee", help="serial port of xbee")
-    args = parser.parse_args()
-    lock = Lock()
-    queue = Queue()
-    myCar = Car(12,args.serial_port_gps, args.serial_port_xbee, lock, queue)
-    myCar.run()
+
+if __name__ == "__main__":
+	# Manage arguments used when launching the script
+	parser = argparse.ArgumentParser()
+	parser.add_argument("serial_port_gps", help="serial port of GPS")
+	parser.add_argument("serial_port_xbee", help="serial port of xbee")
+	args = parser.parse_args()
+

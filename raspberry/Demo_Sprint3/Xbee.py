@@ -5,9 +5,7 @@ import serial
 from xbee import XBee
 import time
 from functools import partial
-
-XBEE_SERIAL_BAUDRATE = 9600
-SERIAL_DELIMITER = ":"
+from constants import *
 
 class Xbee():
     def __init__(self, serial_port):
@@ -20,17 +18,18 @@ class Xbee():
             print("Error creating the serial link")
             exit()
             
-    def readCommand(self,data):
+    def readCommand(self, data):
         message_read = data["rf_data"].decode()
         print(message_read)
         message_read = message_read.split(SERIAL_DELIMITER)
         if len(message_read) > 1:
             self.command = message_read[1]
 
-    def write(self, msg):
-        print("Location : {}".format(msg))
-        if msg != "":
-            self.ser.write(str.encode(msg))
+    def sendMessageBroadcast(self, command, data):
+        msg_to_send = CAR_ID + ":" + command + ":" + data
+        print("Broadcasting {}".format(msg_to_send), end='\r')
+        # Definition des arguments de send() dans Xbee.ieee.Xbee (ctrl + click)
+        self.xbee.send(cmd='tx', dest_addr=BROADCAST_ADDR_16, data=msg_to_send)
 
 
 if __name__ == "__main__":

@@ -16,7 +16,7 @@ def tableEvenement(type):
     elif type=="embouteillage":
         return 1
     elif type=="localisation":
-        return 1
+        return 2
     else:
         return 'z'
 

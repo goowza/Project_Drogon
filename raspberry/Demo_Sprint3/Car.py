@@ -197,7 +197,7 @@ class Car(Thread):
 				#msg_to_write = self.buildMessage()
 				#print("Broadcasting {}".format(msg_to_write))
 				#self.xbee.write(msg_to_write)
-				message_emis=encodage("pieton", "accident", "105.85:43.45")
+				message_emis=encodage("voiture", "localisation", "11.694:31.45")
 
 				
 				#if time.time() - start > SERVER_SEND_COOLDOWN:

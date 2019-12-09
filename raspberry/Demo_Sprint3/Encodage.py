@@ -5,6 +5,8 @@ def tableEmetteur(type):
         return 1
     elif type=="borne":
         return 2
+    elif type=="urgence":
+        return 3
     else:
         return 'z'
 
@@ -12,6 +14,8 @@ def tableEvenement(type):
     if type=="accident":
         return 0
     elif type=="embouteillage":
+        return 1
+    elif type=="localisation":
         return 1
     else:
         return 'z'

@@ -19,6 +19,8 @@ MOVE_FORWARD = "2"
 STOP = "3"
 SHARE_LOCATION = "4"
 STOP_SHARING_LOCATION = "5"
+SHARE_ACCIDENT_LOCATION = "6"
+SHARE_TJ_LOCATION = "7"
 SERIAL_DELIMITER = ":"
 
 MCM = 0x010
@@ -139,6 +141,7 @@ class Car(Thread):
 		
 	
 	def computeCommand(self):
+                global message_emis
 		self.lockXbee.acquire()
 		temp = self.xbee.command
 		print(temp)	
@@ -164,6 +167,12 @@ class Car(Thread):
 		elif temp == STOP_SHARING_LOCATION:
 			self.share_location = False
 			print("STOPPED SHARING LOCATION")
+		elif temp == SHARE_ACCIDENT_LOCATION:
+			message_emis=encodage("voiture", "accident", "10.694:31.45")
+			print("SHARING_ACCIDENT_LOCATION")
+		elif temp == SHARE_TJ_LOCATION:
+			message_emis=encodage("voiture", "embouteillage", "23.787:77.77")
+			print("SHARING_TJ_LOCATION")
 		else:
 			pass
 			#print("Unknown command : {}".format(self.command))

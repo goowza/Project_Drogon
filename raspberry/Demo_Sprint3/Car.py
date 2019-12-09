@@ -13,6 +13,8 @@ import argparse
 from xbee import XBee
 import socket, sys, threading
 
+SERVER_IP = "192.168.43.9"
+SERVER_PORT = 40014
 MOVE_LEFT = "0"
 MOVE_RIGHT = "1"
 MOVE_FORWARD = "2"
@@ -113,6 +115,7 @@ class Car(Thread):
 		self.move_cmd = STOP_MOTORS
 		self.steer_cmd = NULL_STEER
 		self.share_location = False
+		self.share_event = False
 		
 		# Setup CAN communication bus
 		print('Bring up CAN0....')
@@ -137,14 +140,14 @@ class Car(Thread):
 		#msg = can.Message(arbitration_id=MCM, data=[0, 0, self.steer_cmd, 0, 0, 0, 0, 0], extended_id=False)
 		#self.bus.send(msg)
 		self.xbee.command=-1
-		self.lockXbee.release()	
+		self.lockXbee.release()
+		time.sleep(0.1)	
 		
 	
 	def computeCommand(self):
-                global message_emis
+		global message_emis
 		self.lockXbee.acquire()
-		temp = self.xbee.command
-		print(temp)	
+		temp = self.xbee.command	
 		if temp == MOVE_LEFT:
 			self.steer_cmd = 0 | 0x80
 			self.move_cmd = 50 & ~0x80
@@ -168,9 +171,11 @@ class Car(Thread):
 			self.share_location = False
 			print("STOPPED SHARING LOCATION")
 		elif temp == SHARE_ACCIDENT_LOCATION:
+			self.share_event = True
 			message_emis=encodage("voiture", "accident", "10.694:31.45")
 			print("SHARING_ACCIDENT_LOCATION")
 		elif temp == SHARE_TJ_LOCATION:
+			self.share_event = True
 			message_emis=encodage("voiture", "embouteillage", "23.787:77.77")
 			print("SHARING_TJ_LOCATION")
 		else:
@@ -192,16 +197,23 @@ class Car(Thread):
 			#if self.xbee.command != -1:
 			self.sendCANCommand()
 			time.sleep(0.1)
+			if self.share_event:
+				self.lock.release()
+				time.sleep(0.1)
+                                #print("Envoi de localisation")
+				self.lock.acquire()
+				self.share_event = False
+
 			if self.share_location:
 				self.gps.update()
 				#msg_to_write = self.buildMessage()
 				#print("Broadcasting {}".format(msg_to_write))
 				#self.xbee.write(msg_to_write)
 				message_emis=encodage("voiture", "localisation", "11.694:31.45")
-
 				
 				#if time.time() - start > SERVER_SEND_COOLDOWN:
 				self.lock.release()
+				time.sleep(0.1)
 				#print("Envoi de localisation")
 				self.lock.acquire()
 				start = time.time()
@@ -218,8 +230,8 @@ if __name__=="__main__":
 	message_emis=""
 	
 	# Connexion with server
-	host = '10.105.1.85'
-	port = 40002
+	host = SERVER_IP
+	port = SERVER_PORT
 	connexion = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	parser = argparse.ArgumentParser()
 	parser.add_argument("serial_port_gps", help="serial port of GPS")
@@ -244,11 +256,12 @@ if __name__=="__main__":
 	th_E = ThreadEmission(connexion)
 	th_R = ThreadReception(connexion)
 	
-	thread_car.start()
-	th_E.start()
-	th_R.start()
-	thread_car.join()
-	th_E.join()
-	th_R.join()
-
-	connexion.close()
+	try:	
+		thread_car.start()
+		th_E.start()
+		th_R.start()
+		thread_car.join()
+		th_E.join()
+		th_R.join()
+	except KeyboardInterrupt:
+		connexion.close()

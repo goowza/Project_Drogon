@@ -2,6 +2,7 @@
 #!/bin/bash
 
 FIFO=`pwd`/fifo1
+rm fifo1
 [ -p "$FIFO" ] ||mkfifo "$FIFO"
 folderEvent=("Accident" "TrafficJam" "Localisation" "Others")
 folderUser=("Pedestrian" "Car" "EmergencyVehicle" "Bollard" "Others")

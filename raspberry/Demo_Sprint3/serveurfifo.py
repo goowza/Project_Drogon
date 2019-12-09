@@ -4,8 +4,9 @@ import os
  # Definition d'un serveur reseau gerant un systeme de CHAT simplifie.
  # Utilise les threads pour gerer les connexions clientes en parallele.
 
-HOST = '10.105.1.85'
-PORT = 40003
+#HOST = '10.105.1.85'
+HOST = '192.168.43.31'
+PORT = 40002
 
 #pour tester en local
 #HOST = 'localhost'

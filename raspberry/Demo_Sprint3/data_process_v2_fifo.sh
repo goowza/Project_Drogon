@@ -1,13 +1,15 @@
-
 #!/bin/bash
 
+
 FIFO=`pwd`/fifo1
+if [  -d "fifo1" ] ; then
 rm fifo1
+fi
 [ -p "$FIFO" ] ||mkfifo "$FIFO"
-folderEvent=("Accident" "TrafficJam" "Localisation" "Others")
-folderUser=("Pedestrian" "Car" "EmergencyVehicle" "Bollard" "Others")
+folderEvent=("Accident" "TrafficJam" "Location" "Others")
+folderUser=("Pedestrian" "Car" "EmergencyVehicle" "Bollard" "Others")s
 for i in ${folderEvent[@]}
-do
+do     
 	if [ ! -d "$i" ] ; then
 	mkdir $i
 	fi
@@ -22,11 +24,9 @@ done
 	IFS=$'\n'
 			while [ 1 ]
 			do
-				#if [ -s $fichier ]; then 
 				if read  line <$FIFO ; then
 				if [ ! $line == " " ] 
 				then
-				#line=$(head -n 1 $fichier)
 				date=$( echo "$line" | awk '{print $1}' ) ;
 				day=$( echo "$line" | awk '{print $1}' | cut -c1-2 ) ;
 				month=$(echo "$line" | awk '{print $1}'  | cut -c4-5 ) ;
@@ -37,14 +37,15 @@ done
 				heureS=$(echo "$line" | awk '{print $2}'  | cut -c7-8) ;
 				lat=$(echo "$line"| awk -F ":" '{print $3}' ) ;
 				idCommande=$(echo "$line" | awk -F ":" '{print $2}' | cut -c3) ;
-				#echo "IDcommande " $idCommande
 				idUser=$(echo "$line"| awk -F ":" '{print $2}' | cut -c2) ;
 				long=$(echo "$line" | awk -F ":" '{print $2}'  | cut -c4-) ;
 				echo "Decoding of the following frame :    $line"
 	 			if [ ${idCommande} -eq 1 ] &&  [ ${idUser} -eq 1 ]
 				then
+						
 						nameUser="Pedestrian"
 						nameCommande='TrafficJam'
+						echo " $nameCommande notified by $nameUser"
 						touch "$day$month$an_$heureH$heureM$heureS"".txt";
 						echo  "-------------------------------------------------------------------------------">"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "Trame received : $line" >> "$day$month$an_$heureH$heureM$heureS"".txt";
@@ -53,11 +54,12 @@ done
 						echo "Latitude : $lat   Longitude  : $long" >>"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "-----------------------------------------------------------------------------">> "$day$month$an_$heureH$heureM$heureS"".txt";
 						mv  `pwd`/"$day$month$an_$heureH$heureM$heureS"".txt" `pwd`/TrafficJam/Pedestrian
-		
-				elif [ $idCommande -eq 1 ] && [ $idUser -eq 0 ]
+				
+				elif [ ${idCommande} -eq 1 ] &&  [ ${idUser} -eq 0 ] 
 				then
 					nameUser="Car"
 					nameCommande='TrafficJam'
+					echo " $nameCommande notified by $nameUser"
 					touch "$day$month$an_$heureH$heureM$heureS"".txt";
 						echo  "-------------------------------------------------------------------------------">"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "Trame received : $line" >> "$day$month$an_$heureH$heureM$heureS"".txt";
@@ -67,11 +69,12 @@ done
 						echo "-----------------------------------------------------------------------------">> "$day$month$an_$heureH$heureM$heureS"".txt";
 					mv  `pwd`/"$day$month$an_$heureH$heureM$heureS"".txt" `pwd`/TrafficJam/Car
 					
-			   elif [ $idCommande -eq 1 ] && [ $idUser -eq 2]
+			  elif [ ${idCommande} -eq 1 ] &&  [ ${idUser} -eq 2 ] 
 			  then
 					
 					nameUser="Bollard"
 					nameCommande='TrafficJam'
+					echo " $nameCommande notified by $nameUser"
 					touch "$day$month$an_$heureH$heureM$heureS"".txt";
 						echo  "-------------------------------------------------------------------------------">"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "Trame received : $line" >> "$day$month$an_$heureH$heureM$heureS"".txt";
@@ -80,12 +83,13 @@ done
 						echo "Latitude : $lat   Longitude  : $long" >>"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "-----------------------------------------------------------------------------">> "$day$month$an_$heureH$heureM$heureS"".txt";
 					mv  `pwd`/"$day$month$an_$heureH$heureM$heureS"".txt" `pwd`/TrafficJam/Bollard
-			elif [ $idCommande -eq 1 ] && [ $idUser = "z"];
+			elif [ ${idCommande} -eq 1 ] &&  [ "$idUser" = "z" ] 
 			then
 				# embouitellage others
 			
 					nameUser="Others"
 					nameCommande='TrafficJam'
+					echo " $nameCommande notified by $nameUser"
 					touch "$nameUser$day$month$an_$heureH$heureM$heureS"".txt"
 					echo  "--------------------------------">"$nameUser$day$month$an_$heureH$heureM$heureS"".txt"
 					echo "Trame received : $line" >> "$nameUser$day$month$an_$heureH$heureM$heureS"".txt"
@@ -93,12 +97,12 @@ done
 					echo "Latitude : $lat   Longitude  : $long" >>"$nameUser$day$month$an_$heureH$heureM$heureS"".txt"
 					echo "--------------------------------">> "$nameUser$day$month$an_$heureH$heureM$heureS"".txt"
 					mv  `pwd`/"$nameUser$day$month$an_$heureH$heureM$heureS"".txt" `pwd`/TrafficJam/Others
-			elif [ $idCommande -eq 1 ] && [ $idUser -eq 3];
+			elif [ ${idCommande} -eq 1 ] &&  [ ${idUser} -eq 3 ] 
 			then
-				# embouitellage others
 			
 					nameUser="EmergencyVehicle"
 					nameCommande='TrafficJam'
+					echo " $nameCommande notified by $nameUser"
 					touch "$nameUser$day$month$an_$heureH$heureM$heureS"".txt"
 					echo  "--------------------------------">"$nameUser$day$month$an_$heureH$heureM$heureS"".txt"
 					echo "Trame received : $line" >> "$nameUser$day$month$an_$heureH$heureM$heureS"".txt"
@@ -107,11 +111,12 @@ done
 					echo "--------------------------------">> "$nameUser$day$month$an_$heureH$heureM$heureS"".txt"
 					mv  `pwd`/"$nameUser$day$month$an_$heureH$heureM$heureS"".txt" `pwd`/TrafficJam/EmergencyVehicle
 		
-			elif [ $idCommande -eq 0 ] && [ $idUser -eq 1 ]
+			elif [ ${idCommande} -eq 0 ] &&  [ ${idUser} -eq 1 ] 
 			then
 			
 					nameUser="Pedestrian"
 					nameCommande='Accident'
+					echo " $nameCommande notified by $nameUser"
 						touch "$day$month$an_$heureH$heureM$heureS"".txt";
 						echo  "-------------------------------------------------------------------------------">"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "Trame received : $line" >> "$day$month$an_$heureH$heureM$heureS"".txt";
@@ -120,11 +125,13 @@ done
 						echo "Latitude : $lat   Longitude  : $long" >>"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "-----------------------------------------------------------------------------">> "$day$month$an_$heureH$heureM$heureS"".txt";
 					mv  `pwd`/"$day$month$an_$heureH$heureM$heureS"".txt" `pwd`/Accident/Pedestrian
-			elif [ $idCommande -eq 0 ] && [ $idUser -eq 2 ]
+
+			elif [ ${idCommande} -eq 0 ] &&  [ ${idUser} -eq 2 ] 
 			then
 				
 					nameUser="Bollard"
 					nameCommande='Accident'
+					echo " $nameCommande notified by $nameUser"
 						touch "$day$month$an_$heureH$heureM$heureS"".txt";
 						echo  "-------------------------------------------------------------------------------">"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "Trame received : $line" >> "$day$month$an_$heureH$heureM$heureS"".txt";
@@ -133,12 +140,13 @@ done
 						echo "Latitude : $lat   Longitude  : $long" >>"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "-----------------------------------------------------------------------------">> "$day$month$an_$heureH$heureM$heureS"".txt";
 					mv  `pwd`/"$day$month$an_$heureH$heureM$heureS"".txt" `pwd`/Accident/Bollard
-			elif [ $idCommande -eq 0 ]  && [ $idUser -eq 0 ]	
+			elif [ ${idCommande} -eq 0 ] &&  [ ${idUser} -eq 0 ] 
 			then
 				
 		
 					nameUser="Car"
 					nameCommande='Accident'
+					echo " $nameCommande notified by $nameUser"
 					touch "$day$month$an_$heureH$heureM$heureS"".txt";
 						echo  "-------------------------------------------------------------------------------">"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "Trame received : $line" >> "$day$month$an_$heureH$heureM$heureS"".txt";
@@ -147,11 +155,12 @@ done
 						echo "Latitude : $lat   Longitude  : $long" >>"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "-----------------------------------------------------------------------------">> "$day$month$an_$heureH$heureM$heureS"".txt";
 					mv  `pwd`/"$day$month$an_$heureH$heureM$heureS"".txt" `pwd`/Accident/Car
-			elif [ $idCommande -eq 0  ] && [ $idUser = "z"] ;
+			elif [ ${idCommande} -eq 0 ] &&  [ "${idUser}" = "z" ] 
 			then
 		
 				nameUser="Others"
 				nameCommande='Accident'
+				echo " $nameCommande notified by $nameUser"
 				touch "$day$month$an_$heureH$heureM$heureS"".txt";
 						echo  "-------------------------------------------------------------------------------">"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "Trame received : $line" >> "$day$month$an_$heureH$heureM$heureS"".txt";
@@ -161,11 +170,12 @@ done
 						echo "-----------------------------------------------------------------------------">> "$day$month$an_$heureH$heureM$heureS"".txt";
 				mv  `pwd`/"$day$month$an_$heureH$heureM$heureS"".txt" `pwd`/Accident/Others
 	
-			elif [ $idCommande -eq 0  ] && [ $idUser -eq 3] ;
+			elif [ ${idCommande} -eq 0 ] &&  [ ${idUser} -eq 3 ] 
 			then
 		
 				nameUser="EmergencyVehicle"
 				nameCommande='Accident'
+				echo " $nameCommande notified by $nameUser"
 				touch "$day$month$an_$heureH$heureM$heureS"".txt";
 						echo  "-------------------------------------------------------------------------------">"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "Trame received : $line" >> "$day$month$an_$heureH$heureM$heureS"".txt";
@@ -175,11 +185,12 @@ done
 						echo "-----------------------------------------------------------------------------">> "$day$month$an_$heureH$heureM$heureS"".txt";
 				mv  `pwd`/"$day$month$an_$heureH$heureM$heureS"".txt" `pwd`/Accident/EmergencyVehicle
 
-			elif [ $idCommande -eq 2  ] && [ $idUser -eq 3] ;
+			elif [ ${idCommande} -eq 2 ] &&  [ ${idUser} -eq 3 ] 
 			then
 		
 				nameUser="EmergencyVehicle"
-				nameCommande='Localisation'
+				nameCommande='Location'
+				echo " $nameCommande notified by $nameUser"
 				touch "$day$month$an_$heureH$heureM$heureS"".txt";
 						echo  "-------------------------------------------------------------------------------">"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "Trame received : $line" >> "$day$month$an_$heureH$heureM$heureS"".txt";
@@ -187,12 +198,13 @@ done
 						echo "Event :  $nameCommande at $heure on $date " >>"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "Latitude : $lat   Longitude  : $long" >>"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "-----------------------------------------------------------------------------">> "$day$month$an_$heureH$heureM$heureS"".txt";
-				mv  `pwd`/"$day$month$an_$heureH$heureM$heureS"".txt" `pwd`/Localisation/EmergencyVehicle
-			elif [ $idCommande -eq 2 ] && [ $idUser -eq 1] ;
+				mv  `pwd`/"$day$month$an_$heureH$heureM$heureS"".txt" `pwd`/Location/EmergencyVehicle
+			elif [ ${idCommande} -eq 2 ] &&  [ ${idUser} -eq 1 ] 
 			then
 		
 				nameUser="Pedestrian"
-				nameCommande='Localisation'
+				nameCommande='Location'
+				echo " $nameCommande notified by $nameUser"
 				touch "$day$month$an_$heureH$heureM$heureS"".txt";
 						echo  "-------------------------------------------------------------------------------">"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "Trame received : $line" >> "$day$month$an_$heureH$heureM$heureS"".txt";
@@ -200,13 +212,14 @@ done
 						echo "Event :  $nameCommande at $heure on $date " >>"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "Latitude : $lat   Longitude  : $long" >>"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "-----------------------------------------------------------------------------">> "$day$month$an_$heureH$heureM$heureS"".txt";
-				mv  `pwd`/"$day$month$an_$heureH$heureM$heureS"".txt" `pwd`/Localisation/Pedestrian
+				mv  `pwd`/"$day$month$an_$heureH$heureM$heureS"".txt" `pwd`/Location/Pedestrian
 
-			elif [ $idCommande -eq 2 ] && [ $idUser -eq 0] ;
+			elif [ ${idCommande} -eq 2 ] &&  [ ${idUser} -eq 0 ] 
 			then
 		
 				nameUser="Car"
-				nameCommande='Localisation'
+				nameCommande='Location'
+				echo " $nameCommande notified by $nameUser"
 				touch "$day$month$an_$heureH$heureM$heureS"".txt";
 						echo  "-------------------------------------------------------------------------------">"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "Trame received : $line" >> "$day$month$an_$heureH$heureM$heureS"".txt";
@@ -214,12 +227,13 @@ done
 						echo "Event :  $nameCommande at $heure on $date " >>"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "Latitude : $lat   Longitude  : $long" >>"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "-----------------------------------------------------------------------------">> "$day$month$an_$heureH$heureM$heureS"".txt";
-				mv  `pwd`/"$day$month$an_$heureH$heureM$heureS"".txt" `pwd`/Localisation/Car
-			elif [ $idCommande -eq 2 ] && [ $idUser -eq 2] ;
+				mv  `pwd`/"$day$month$an_$heureH$heureM$heureS"".txt" `pwd`/Location/Car
+			elif [ ${idCommande} -eq 2 ] &&  [ ${idUser} -eq 2 ] 
 			then
 		
 				nameUser="Bollard"
-				nameCommande='Localisation'
+				nameCommande='Location'
+				echo " $nameCommande notified by $nameUser"
 				touch "$day$month$an_$heureH$heureM$heureS"".txt";
 						echo  "-------------------------------------------------------------------------------">"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "Trame received : $line" >> "$day$month$an_$heureH$heureM$heureS"".txt";
@@ -227,12 +241,13 @@ done
 						echo "Event :  $nameCommande at $heure on $date " >>"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "Latitude : $lat   Longitude  : $long" >>"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "-----------------------------------------------------------------------------">> "$day$month$an_$heureH$heureM$heureS"".txt";
-				mv  `pwd`/"$day$month$an_$heureH$heureM$heureS"".txt" `pwd`/Localisation/Bollard
-			elif [ $idCommande -eq 2 ] && [ $idUser = "z"] ;
+				mv  `pwd`/"$day$month$an_$heureH$heureM$heureS"".txt" `pwd`/Location/Bollard
+			elif [ ${idCommande} -eq 2 ] &&  [ "${idUser}" = "z" ] 
 			then
 		
 				nameUser="Others"
-				nameCommande='Localisation'
+				nameCommande='Location'
+				echo " $nameCommande notified by $nameUser"
 				touch "$day$month$an_$heureH$heureM$heureS"".txt";
 						echo  "-------------------------------------------------------------------------------">"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "Trame received : $line" >> "$day$month$an_$heureH$heureM$heureS"".txt";
@@ -240,12 +255,13 @@ done
 						echo "Event :  $nameCommande at $heure on $date " >>"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "Latitude : $lat   Longitude  : $long" >>"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "-----------------------------------------------------------------------------">> "$day$month$an_$heureH$heureM$heureS"".txt";
-				mv  `pwd`/"$day$month$an_$heureH$heureM$heureS"".txt" `pwd`/Localisation/Others
-			elif [ $idCommande = "z"  ] && [ $idUser -eq 1 ];
+				mv  `pwd`/"$day$month$an_$heureH$heureM$heureS"".txt" `pwd`/Location/Others
+			elif [ "${idCommande}" = "z" ] &&  [ ${idUser} -eq 1 ] 
 			then
 			
 				nameUser="Pedestrian"
 				nameCommande='Others'
+				echo " $nameCommande notified by $nameUser"
 				touch "$day$month$an_$heureH$heureM$heureS"".txt";
 						echo  "-------------------------------------------------------------------------------">"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "Trame received : $line" >> "$day$month$an_$heureH$heureM$heureS"".txt";
@@ -253,12 +269,13 @@ done
 						echo "Event :  $nameCommande at $heure on $date " >>"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "Latitude : $lat   Longitude  : $long" >>"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "-----------------------------------------------------------------------------">> "$day$month$an_$heureH$heureM$heureS"".txt";
-				mv  /home/tp-ada-insa/"$day$month$an_$heureH$heureM$heureS"".txt" /home/tp-ada-insa/Others/Pedestrian
-			elif [ $idCommande = "z" ] && [ $idUser -eq 0 ]	;
+				mv  `pwd`/"$day$month$an_$heureH$heureM$heureS"".txt" `pwd`/Others/Pedestrian
+			elif [ "${idCommande}" = "z" ] &&  [ ${idUser} -eq 0 ] 
 			then
 			 	
 				nameUser="Car"
 				nameCommande='Others'
+				echo " $nameCommande notified by $nameUser"
 					touch "$day$month$an_$heureH$heureM$heureS"".txt";
 						echo  "-------------------------------------------------------------------------------">"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "Trame received : $line" >> "$day$month$an_$heureH$heureM$heureS"".txt";
@@ -267,10 +284,11 @@ done
 						echo "Latitude : $lat   Longitude  : $long" >>"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "-----------------------------------------------------------------------------">> "$day$month$an_$heureH$heureM$heureS"".txt";
 				mv  `pwd`/"$day$month$an_$heureH$heureM$heureS"".txt" `pwd`/Others/Car
-			elif [ $idCommande = "z" ] && [ $idUser -eq 2 ];
+			elif [ "${idCommande}" = "z" ] &&  [ ${idUser} -eq 2 ] 
 			then
 				nameUser="Bollard"
 				nameCommande='Others'
+				echo " $nameCommande notified by $nameUser"
 					touch "$day$month$an_$heureH$heureM$heureS"".txt";
 						echo  "-------------------------------------------------------------------------------">"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "Trame received : $line" >> "$day$month$an_$heureH$heureM$heureS"".txt";
@@ -279,10 +297,11 @@ done
 						echo "Latitude : $lat   Longitude  : $long" >>"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "-----------------------------------------------------------------------------">> "$day$month$an_$heureH$heureM$heureS"".txt";
 				mv  `pwd`/"$day$month$an_$heureH$heureM$heureS"".txt" `pwd`/Others/Bollard
-			elif [ $idCommande = "z" ] && [ $idUser -eq 3 ];
+			elif [ "${idCommande}" = "z" ] &&  [ ${idUser} -eq 3 ] 
 			then
 				nameUser="EmergencyVehicle"
 				nameCommande='Others'
+				echo " $nameCommande notified by $nameUser"
 					touch "$day$month$an_$heureH$heureM$heureS"".txt";
 						echo  "-------------------------------------------------------------------------------">"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "Trame received : $line" >> "$day$month$an_$heureH$heureM$heureS"".txt";
@@ -291,10 +310,12 @@ done
 						echo "Latitude : $lat   Longitude  : $long" >>"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "-----------------------------------------------------------------------------">> "$day$month$an_$heureH$heureM$heureS"".txt";
 				mv  `pwd`/"$day$month$an_$heureH$heureM$heureS"".txt" `pwd`/Others/EmergencyVehicle
+
 			else
 			
 				nameUser="Others"
 				nameCommande='Others'
+				echo " $nameCommande notified by $nameUser"
 					touch "$day$month$an_$heureH$heureM$heureS"".txt";
 						echo  "-------------------------------------------------------------------------------">"$day$month$an_$heureH$heureM$heureS"".txt";
 						echo "Trame received : $line" >> "$day$month$an_$heureH$heureM$heureS"".txt";
@@ -305,11 +326,11 @@ done
 				mv  `pwd`/"$day$month$an_$heureH$heureM$heureS"".txt" `pwd`/Others/Others
 				fi
 		 
-		#sed -i '1d' $fichier
-		#sed -i '/^[[:space:]]*$/d' $fichier
 		
-			echo "End of the frame decoding :    $line" 	
+			echo "End of the frame decoding :    $line" 
+			echo "-------------------------------------------------"	
 		fi
-               fi 
+	fi
 		done	
 	
+

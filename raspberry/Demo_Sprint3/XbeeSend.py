@@ -12,6 +12,8 @@ MOVE_FORWARD = "2"
 STOP = "3"
 SHARE_LOCATION = "4"
 STOP_SHARING_LOCATION = "5"
+SHARE_ACCIDENT_LOCATION = "6"
+SHARE_TJ_LOCATION = "7"
 SERIAL_DELIMITER = ":"
 ID = 777
 XBEE_SERIAL_BAUDRATE = 9600
@@ -39,7 +41,7 @@ class GUI():
         self.command_choice = StringVar()
         self.combobox = ttk.Combobox(self.choose_command_frame, width=15, textvariable=self.command_choice)
         self.combobox['values'] = (
-        "Turn Right", "Turn Left", "Activate Wheels", "Stop", "Share Location", "Stop Sharing Location")
+        "Turn Right", "Turn Left", "Activate Wheels", "Stop", "Share Location", "Stop Sharing Location","Share Accident Location","Share Traffic Jam Location")
         self.choose_command_frame.pack(fill=X, padx=(5, 5), pady=(5, 5))
         self.combobox.pack(fill=X, padx=(5, 5), pady=(5, 5))
 
@@ -72,6 +74,10 @@ class GUI():
             msg = self.buildMessage(SHARE_LOCATION)
         elif self.command_choice.get() == "Stop Sharing Location":
             msg = self.buildMessage(STOP_SHARING_LOCATION)
+        elif self.command_choice.get() == "Share Accident Location":
+            msg = self.buildMessage(SHARE_ACCIDENT_LOCATION)
+        elif self.command_choice.get() == "Share Traffic Jam Location":
+            msg = self.buildMessage(SHARE_TJ_LOCATION)
         else:
             msg = ""
             self.command_choice_label.configure(text="Choose a valid command")

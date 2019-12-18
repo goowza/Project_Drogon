@@ -25,6 +25,9 @@ GPIO.output(Gyro, GPIO.LOW)
 # Compte le nombre de messages recus
 count = 0
 
+prev_rssi = 100
+pres = False
+
 def print_data(data):
     """
     This method is called whenever data is received
@@ -36,19 +39,24 @@ def print_data(data):
     """
     global count
     count = count + 1
-
+    global prev_rssi
+    global pres
+    
     try:
-        #print(data)
-        #print("RSSI value : {} Data value : {} ({})".format(ord(data["rssi"].decode()), data["rf_data"], count), end="\r")
         ID = data["rf_data"].decode().split(":")[0]
         if ID == "HL118":
             RSSI = ord(data["rssi"].decode())
-            if RSSI < 60:
-                print("pres")
-                GPIO.output(Gyro, GPIO.HIGH)
-            else:
-                print("loin")
-                GPIO.output(Gyro, GPIO.LOW)
+            #print("RSSI : {} ({})".format(RSSI, count), end = '\r')
+            if not pres and RSSI < 60 and prev_rssi < 60:
+                #GPIO.output(Gyro, GPIO.HIGH)
+                pres = True
+                pass
+            elif pres and RSSI > 65 and prev_rssi > 65:
+                #GPIO.output(Gyro, GPIO.LOW)
+                pres = False
+                pass
+            print("{} ({})".format(pres,RSSI))
+            prev_rssi = RSSI
                 
     except:
         print("GNEUGNEU")

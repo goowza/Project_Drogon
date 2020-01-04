@@ -1,0 +1,26 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+XBEE_SERIAL_BAUDRATE = 9600
+SERIAL_DELIMITER = ":"
+
+SERVER_IP = '10.105.1.85'
+SERVER_PORT = 40002
+SERVER_SEND_COOLDOWN = 500
+BROADCAST_ADDR_16 = b'\xFF\xFF'
+
+CAR_ID = "HL118"
+
+MOVE_LEFT = "0"
+MOVE_RIGHT = "1"
+MOVE_FORWARD = "2"
+STOP = "3"
+SHARE_LOCATION = "4"
+STOP_SHARING_LOCATION = "5"
+
+MCM = 0x010
+
+# Steering angle = 0
+NULL_STEER = 50 | 0x80
+# Stop rear wheels
+STOP_MOTORS = 0 & ~0x80

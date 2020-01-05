@@ -18,6 +18,10 @@ PORT = 6668
 import socket, sys, threading
 
 basename = "image.jpg"
+counter = 0
+image_bytes = b''
+imgcounter = 1
+PICS_PATH = "server_img.jpg"
  
 class ThreadClient(threading.Thread):
    '''derivation d'un objet thread pour gerer la connexion avec un client'''
@@ -34,23 +38,47 @@ class ThreadClient(threading.Thread):
                break
            message = "%s> %s" % (nom, msgClient)
            print message
-           print msgClient[1]
-           if msgClient[1]=="3":
-                taille=msgClient[2:]
-                print "Taille de %s"  %taille
-                conn_client[nom].send("GOT SIZE")
-                myfile = open(basename, 'wb')
-                #myfile.write(msgClient)
+           #print msgClient[1]
+           if msgClient.startswith("SIZE"):
+               # Get size of image
+               size = msgClient.split()[1]
+               #print size
+               #onn.sendall("GOT SIZE".encode(encoding="utf-8"))
+               conn_client[nom].send("GOT SIZE")
 
-                msgClient = self.connexion.recv(40960000)
-                if not msgClient:
-                    myfile.close()
-                    break
-                myfile.write(msgClient)
-                myfile.close()
+               # Get each packet and rebuild the image
+               for i in range(int(size)):
+                   msgClient = conn.recv(4096)
+                   if not msgClient:
+                       break
+                   conn_client[nom].send("OK")
+                   counter += 1
+                   image_bytes += msgClient
 
-                print 'got image'
-                conn_client[nom].send("GOT IMAGE")
+               # Check if image was not empty
+               if counter != 0:
+                   # close previously opened image window
+                   for proc in psutil.process_iter():
+                       if proc.name() == "display":
+                           proc.kill()
+                   print("Received {} packets".format(counter))
+                   if os.path.isfile(PICS_PATH):
+                       os.remove(PICS_PATH)
+
+                   # Save image
+                   image_to_save = open(PICS_PATH, 'wb')
+                   image_to_save.write(image_bytes)
+                   image_to_save.close()
+                   image_bytes = b''
+
+                   # Display image
+                   img = Image.open(PICS_PATH)
+                   img.show()
+               counter = 0
+
+
+                #taille=msgClient[2:]
+
 
            else :
                date=time.strftime("%d/%m/%Y %Hh%Mm%Ss : ")

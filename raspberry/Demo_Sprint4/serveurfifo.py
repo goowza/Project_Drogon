@@ -1,43 +1,49 @@
 import time
 import os
+import socket, sys, threading
+import psutil
+from PIL import Image
 
  # Definition d'un serveur reseau gerant un systeme de CHAT simplifie.
  # Utilise les threads pour gerer les connexions clientes en parallele.
 
-#HOST = '10.105.1.85'
-#HOST = '192.168.43.31'
+HOST = '10.105.1.85'
+#HOST = '192.168.43.9'
 #PORT = 40002
 
 #pour tester en local
 #HOST = 'localhost'
 #PORT = 9998
 
-HOST = '127.0.0.1'
-PORT = 6668
-
-import socket, sys, threading
+#HOST = '127.0.0.1'
+PORT = 40000
+#HOST = '192.168.43.54'
 
 basename = "image.jpg"
-counter = 0
-image_bytes = b''
-imgcounter = 1
+#counter = 0
+#image_bytes = b''
+#imgcounter = 1
 PICS_PATH = "server_img.jpg"
  
 class ThreadClient(threading.Thread):
    '''derivation d'un objet thread pour gerer la connexion avec un client'''
    def __init__(self, conn):
        threading.Thread.__init__(self)
+       self.counter = 0
        self.connexion = conn
+       self.image_bytes = b''
+       self.end = False
        
    def run(self):
+       PICS_PATH = "server_img.jpg"
        # Dialogue avec le client :
        nom = self.getName()        # Chaque thread possede un nom
-       while 1:
+       while not self.end:
            msgClient = self.connexion.recv(4096)
            if msgClient.upper() == "FIN" or msgClient =="":
                break
            message = "%s> %s" % (nom, msgClient)
-           print message
+           #print message
            #print msgClient[1]
            if msgClient.startswith("SIZE"):
                # Get size of image
@@ -48,33 +54,38 @@ class ThreadClient(threading.Thread):
 
                # Get each packet and rebuild the image
                for i in range(int(size)):
-                   msgClient = conn.recv(4096)
+                   msgClient = self.connexion.recv(4096)
                    if not msgClient:
                        break
                    conn_client[nom].send("OK")
-                   counter += 1
-                   image_bytes += msgClient
+                   self.counter += 1
+                   self.image_bytes += msgClient
 
                # Check if image was not empty
-               if counter != 0:
+               if self.counter != 0:
                    # close previously opened image window
                    for proc in psutil.process_iter():
                        if proc.name() == "display":
                            proc.kill()
-                   print("Received {} packets".format(counter))
+                           #sys.stdout.write("\033[F")
+                           #sys.stdout.write("\033[K")
+                       
+                   #print "Received %d packets" %self.counter
                    if os.path.isfile(PICS_PATH):
                        os.remove(PICS_PATH)
 
                    # Save image
                    image_to_save = open(PICS_PATH, 'wb')
-                   image_to_save.write(image_bytes)
+                   image_to_save.write(self.image_bytes)
                    image_to_save.close()
-                   image_bytes = b''
+                   self.image_bytes = b''
 
-                   # Display image
+
+                       # Display image
                    img = Image.open(PICS_PATH)
                    img.show()
-               counter = 0
+
+               self.counter = 0
 
 
                 #taille=msgClient[2:]
@@ -86,15 +97,18 @@ class ThreadClient(threading.Thread):
                cmd = 'echo ' + str(msg) + '>fifo1'
                os.popen(cmd, 'w')
                # Faire suivre le message a tous les autres clients :
-               for cle in conn_client:
-                   if cle != nom:      # ne pas le renvoyer a l'emetteur
-                       conn_client[cle].send(message.encode('utf-8'))
+               #for cle in conn_client:
+                   #if cle != nom:      # ne pas le renvoyer a l'emetteur
+                       #conn_client[cle].send(message.encode('utf-8'))
                    
        # Fermeture de la connexion :
        self.connexion.close()      # couper la connexion cote serveur
        del conn_client[nom]        # supprimer son entree dans le dictionnaire
        print "Client %s deconnecte." % nom
-       # Le thread se termine ici    
+       # Le thread se termine ici
+
+   def stopthread(self):
+       self.end = True
 
 # Initialisation du serveur - Mise en place du socket :
 mySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -110,15 +124,30 @@ mySocket.listen(10)
 
 # Attente et prise en charge des connexions demandees par les clients :
 conn_client = {}                # dictionnaire des connexions clients
-while 1:    
-    connexion, adresse = mySocket.accept()
-    # Creer un nouvel objet thread pour gerer la connexion :
-    th = ThreadClient(connexion)
-    th.start()
-    # Memoriser la connexion dans le dictionnaire : 
-    it = th.getName()        # identifiant du thread
-    conn_client[it] = connexion
-    print "Client %s connecte, adresse IP %s, port %s." %\
-           (it, adresse[0], adresse[1])
-    # Dialogue avec le client :
-    connexion.send("Vous etes connecte. Envoyez vos messages.")
+threads = {} #dictionnaire des threads
+try :
+    while 1:    
+        connexion, adresse = mySocket.accept()
+        # Creer un nouvel objet thread pour gerer la connexion :
+        th = ThreadClient(connexion)
+        th.start()
+        # Memoriser la connexion dans le dictionnaire : 
+        it = th.getName()        # identifiant du thread
+        threads[it] = th
+        conn_client[it] = connexion
+        print "Client %s connecte, adresse IP %s, port %s." %\
+               (it, adresse[0], adresse[1])
+        # Dialogue avec le client :
+        connexion.send("Vous etes connecte. Envoyez vos messages.")
+except KeyboardInterrupt:
+        for j in threads:
+            #print "Thread %s" % j
+            threads[j].stopthread()
+        
+        for i in conn_client:
+            #print "Socket %s" % i
+            conn_client[i].close()
+        mySocket.close()
+        print "Fermeture de tous les sockets. System exit."
+        sys.exit()
+        

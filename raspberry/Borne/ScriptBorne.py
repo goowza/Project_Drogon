@@ -6,17 +6,20 @@ import os
 import time
 from xbee import XBee
 import RPi.GPIO as GPIO
-import pygame, picamera
+import picamera
 import socket
-from random import randint
+from RSSI_Receive import *
 
 #HOST = '127.0.0.1'
-HOST = "192.168.43.222"
-PORT = 50000
+HOST = "192.168.43.9"
+#HOST = "10.105.1.85"
+PORT = 40000
 PICS_PATH = "image.jpg"
 PACKET_SIZE = 1024
 CAMERA_WIDTH = 640
 CAMERA_HEIGHT = 480
+PIN_LED = 12
+PIN_BUZ = 13
 
 class ImageSender():
     def __init__(self, pics_path):
@@ -98,71 +101,50 @@ class ImageSender():
         else:
             return q
 
-my_sender = ImageSender(PICS_PATH)
-            
-def print_data(data):
-    """
-    This method is called whenever data is received
-    from the associated XBee device. Its first and
-    only argument is the data contained within the
-    frame.
-    data = dictionnaire avec les champs :
-    {'id': 'rx', 'source_addr': b'\x00\x04', 'rssi': b'>', 'options': b'\x02', 'rf_data': b'Hey'}
-    """
-    global count
-    global my_sender
-    count = count + 1
-
-    try:
-        ID = data["rf_data"].decode().split(":")[0]
-        command = data["rf_data"].decode().split(":")[1]
-        if ID == "HL118":
-            RSSI = ord(data["rssi"].decode())
-            if RSSI < 60:
-                print("pres")
-                GPIO.output(Gyro, GPIO.HIGH)
-            else:
-                print("loin")
-                GPIO.output(Gyro, GPIO.LOW)
-        elif command == "1":
-            print("SENDING PICS")
-            my_sender.take_pic()
-            my_sender.send_to_server()
-            
-    except:
-        print("GNEUGNEU")
+class Borne():
+    def __init__(self, pin_led, pin_buz):
+        GPIO.setmode(GPIO.BOARD)
+        GPIO.setwarnings(False)
+        self.sender = ImageSender(PICS_PATH)
+        self.xbee_dir = XbeeDir("/dev/ttyAMA0")
+        self.pin_led = pin_led
+        self.pin_buz = pin_buz
+        GPIO.setup(self.pin_led, GPIO.OUT, initial=GPIO.LOW)
+        GPIO.setup(self.pin_buz, GPIO.OUT, initial=GPIO.LOW)
+        
+    def run(self):
+        while True:
+            try:
+                if not self.xbee_dir.connexion_lost():
+                    if self.xbee_dir.sending_pics_flag:
+                        self.sender.take_pic()
+                        self.sender.send_to_server()
+                    if self.xbee_dir.bollard_command == "ON":
+                        self.bollard_on()
+                    else:
+                        self.bollard_off()
+                else:
+                    self.bollard_off()
+            except KeyboardInterrupt:
+                break
+    
+    def bollard_on(self):
+        GPIO.output(self.pin_led, GPIO.HIGH)
+        GPIO.output(self.pin_buz, GPIO.HIGH)
+        
+    def bollard_off(self):
+        GPIO.output(self.pin_led, GPIO.LOW)
+        GPIO.output(self.pin_buz, GPIO.LOW)
+        
+    def close(self):
+        self.bollard_off()
+        self.sender.camera.close()
+        self.sender.sock.close()
+        self.xbee_dir.xbee.halt()
+        self.xbee_dir.serial_port.close()
 
 if __name__=="__main__":
+    borne = Borne(PIN_LED, PIN_BUZ)
+    borne.run()
+    borne.close()
 
-    # Parametre les GPIO
-    GPIO.setmode(GPIO.BOARD)
-    GPIO.setwarnings(False)
-    Gyro = 13
-
-    GPIO.setup(Gyro, GPIO.OUT)
-    GPIO.output(Gyro, GPIO.LOW)
-
-    # Compte le nombre de messages recus
-    count = 0
-    
-    try:
-        serial_port = serial.Serial("/dev/ttyAMA0", 9600)
-        #xbee = XBee(serial_port, callback=print_data)
-    except:
-        print("Error creating serial link")
-        exit()
-
-    while True:
-        try:
-            time.sleep(1)
-            my_sender.take_pic()
-            my_sender.send_to_server()
-        except KeyboardInterrupt:
-            break
-
-    print("\n")
-    my_sender.camera.close()
-    my_sender.sock.close()
-    #pygame.quit()
-    #xbee.halt()
-    serial_port.close()

@@ -41,23 +41,21 @@ def print_data(data):
     count = count + 1
     global prev_rssi
     global pres
-    
     try:
         ID = data["rf_data"].decode().split(":")[0]
         if ID == "HL118":
             RSSI = ord(data["rssi"].decode())
             #print("RSSI : {} ({})".format(RSSI, count), end = '\r')
-            if not pres and RSSI < 60 and prev_rssi < 60:
+            if not pres and RSSI < 65:
                 #GPIO.output(Gyro, GPIO.HIGH)
                 pres = True
                 pass
-            elif pres and RSSI > 65 and prev_rssi > 65:
+            elif pres and RSSI > 70 and prev_rssi > 70:
                 #GPIO.output(Gyro, GPIO.LOW)
                 pres = False
                 pass
             print("{} ({})".format(pres,RSSI))
-            prev_rssi = RSSI
-                
+            prev_rssi = RSSI            
     except:
         print("GNEUGNEU")
 

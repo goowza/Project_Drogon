@@ -7,9 +7,11 @@ import psutil
 
 imgcounter = 1
 basename = "image.jpg"
+contenuTelecharge = 0
 
+#HOST = '192.168.43.9'
 HOST = '127.0.0.1'
-PORT = 6668
+PORT = 6673
 
 connected_clients_sockets = []
 
@@ -30,7 +32,7 @@ while True:
             connected_clients_sockets.append(sockfd)
         else:
             try:
-                data = sock.recv(40960000)
+                data = sock.recv(1024)
                 txt = str(data)
                 if data:
                     print 'data received !'
@@ -47,24 +49,41 @@ while True:
                     else :
                         #if os.path.isfile(basename):
                         #    os.remove(basename)
-                        myfile = open(basename , 'wb')
-                        myfile.write(data)
+                        #myfile = open(basename , 'wb')
+                        #myfile.write(data)
 
                         #data = sock.recv(40960000)
                         if not data:
                             myfile.close()
                             break
-                        myfile.write(data)
-                        myfile.close()
+                        else :
+                            #On enregistre dans le fichier
+                            #myfile.write(data)
+                            #On ajoute la taille du contenu recu au contenu telecharge
+                            contenuTelecharge += len(data)
+                            print 'total size : %d' %size
+                            while contenuTelecharge < size:
+                                #On lit les 1024 octets suivant
+                                data = socket.recv(1024)
+                                if data:
+                                    sock.sendall("GOT DATA")
+                                    print 'len data : %d' %len(data)
+                                    #On enregistre dans le fichier
+                                    #myfile.write(data)
+                                    #On ajoute la taille du contenu recu au contenu telecharge
+                                    contenuTelecharge += len(data)
+                                    print 'DL %s/%s' %contenuTelecharge %size
+                            
+                            #myfile.close()
 			
 			print 'got image'
                         sock.sendall("GOT IMAGE")
-                        
+                        """
                         for proc in psutil.process_iter():
                             if proc.name() == "display":
                                 proc.kill()
                         img = Image.open(basename)
-                        img.show()
+                        img.show()"""
                         
             except:
                 print 'error'
@@ -73,5 +92,4 @@ while True:
                 continue
         imgcounter += 1
 server_socket.close()
-
 
